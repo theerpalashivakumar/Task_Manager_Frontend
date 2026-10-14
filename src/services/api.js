@@ -39,11 +39,11 @@ api.interceptors.response.use(
       errors: error.response?.data?.errors || [],
     };
 
-    // Auto logout if 401 and not an explanation request
+    // Auto logout if 401 and not an explanation or login request
     if (
       customError.statusCode === 401 &&
-      !error.config.url.includes('/auth/login') &&
-      !error.config.url.includes('/project-explanation')
+      !error.config?.url?.includes('/auth/login') &&
+      !error.config?.url?.includes('/project-explanation')
     ) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');

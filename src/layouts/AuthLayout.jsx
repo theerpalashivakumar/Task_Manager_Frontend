@@ -1,25 +1,9 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { openExplanationModal } from '../redux/slices/uiSlice';
-import ViewProjectModal from '../components/layout/ViewProjectModal';
 import ToastContainer from '../components/common/ToastContainer';
-import { FolderKanban, Sparkles, Unlock } from 'lucide-react';
+import { FolderKanban } from 'lucide-react';
 
 const AuthLayout = () => {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const { isExplanationUnlocked } = useSelector((state) => state.ui);
-
-  const handleViewProject = () => {
-    if (isExplanationUnlocked) {
-      navigate('/project-explanation');
-    } else {
-      dispatch(openExplanationModal());
-    }
-  };
-
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col justify-center items-center p-4 relative overflow-hidden">
       {/* Dynamic Background Glows */}
@@ -34,18 +18,6 @@ const AuthLayout = () => {
           </div>
           <span className="text-white font-bold text-sm tracking-tight">TeamPulse</span>
         </div>
-
-        <button
-          onClick={handleViewProject}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/10 text-white hover:bg-white/20 backdrop-blur-md border border-white/10 transition-all"
-        >
-          {isExplanationUnlocked ? (
-            <Unlock className="w-3.5 h-3.5 text-emerald-400" />
-          ) : (
-            <Sparkles className="w-3.5 h-3.5 text-brand-300" />
-          )}
-          <span>{isExplanationUnlocked ? 'Architecture Docs' : 'View Project'}</span>
-        </button>
       </div>
 
       {/* Auth Card Container */}
@@ -53,7 +25,6 @@ const AuthLayout = () => {
         <Outlet />
       </div>
 
-      <ViewProjectModal />
       <ToastContainer />
     </div>
   );
