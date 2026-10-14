@@ -212,11 +212,13 @@ const TaskListPage = () => {
           {tasks.map((task) => {
             const isOverdue =
               new Date(task.dueDate) < new Date() && task.status !== 'Done';
-            const isAssignee = task.assignedTo?._id === user?._id;
+            const currentUserId = (user?._id || user?.id)?.toString();
+            const assigneeId = (task.assignedTo?._id || task.assignedTo)?.toString();
+            const isAssignee = assigneeId && currentUserId && assigneeId === currentUserId;
+            const pmId = (task.project?.projectManager?._id || task.project?.projectManager)?.toString();
             const canEdit =
               user?.role === 'admin' ||
-              (user?.role === 'project_manager' &&
-                task.project?.projectManager === user?._id);
+              (user?.role === 'project_manager' && pmId && pmId === currentUserId);
 
             return (
               <div

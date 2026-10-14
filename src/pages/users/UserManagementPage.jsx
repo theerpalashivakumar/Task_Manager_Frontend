@@ -128,7 +128,9 @@ const UserManagementPage = () => {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {users.map((u) => {
-                const isSelf = u._id === currentUser?._id;
+                const targetUserId = (u._id || u.id)?.toString();
+                const currentUserId = (currentUser?._id || currentUser?.id)?.toString();
+                const isSelf = targetUserId && currentUserId && targetUserId === currentUserId;
 
                 return (
                   <tr key={u._id} className="hover:bg-slate-50/50 transition-colors">

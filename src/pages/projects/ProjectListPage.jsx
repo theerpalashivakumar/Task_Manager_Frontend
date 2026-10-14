@@ -128,7 +128,9 @@ const ProjectListPage = () => {
       ) : projects.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {projects.map((proj) => {
-            const isPM = proj.projectManager?._id === user?._id;
+            const pmId = (proj.projectManager?._id || proj.projectManager)?.toString();
+            const currentUserId = (user?._id || user?.id)?.toString();
+            const isPM = pmId && currentUserId && pmId === currentUserId;
             const canEdit = user?.role === 'admin' || isPM;
             const isDeadlinePassed = new Date(proj.deadline) < new Date() && proj.status !== 'Completed';
 

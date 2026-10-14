@@ -1,12 +1,23 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import authService from '../../services/authService';
 
+// Helper to guarantee both _id and id exist on user objects
+const normalizeUser = (user) => {
+  if (!user) return null;
+  const id = user._id || user.id;
+  return {
+    ...user,
+    _id: id,
+    id: id,
+  };
+};
+
 // Initialize from localStorage
 const storedToken = localStorage.getItem('token');
 let storedUser = null;
 try {
   const userJson = localStorage.getItem('user');
-  if (userJson) storedUser = JSON.parse(userJson);
+  if (userJson) storedUser = normalizeUser(JSON.parse(userJson));
 } catch (e) {
   localStorage.removeItem('user');
 }
@@ -14,9 +25,10 @@ try {
 export const loginUser = createAsyncThunk('auth/login', async (credentials, { rejectWithValue }) => {
   try {
     const res = await authService.login(credentials);
+    const user = normalizeUser(res.data.user);
     localStorage.setItem('token', res.data.token);
-    localStorage.setItem('user', JSON.stringify(res.data.user));
-    return res.data;
+    localStorage.setItem('user', JSON.stringify(user));
+    return { ...res.data, user };
   } catch (error) {
     return rejectWithValue(error.message || 'Login failed');
   }
@@ -25,9 +37,10 @@ export const loginUser = createAsyncThunk('auth/login', async (credentials, { re
 export const registerUser = createAsyncThunk('auth/register', async (userData, { rejectWithValue }) => {
   try {
     const res = await authService.register(userData);
+    const user = normalizeUser(res.data.user);
     localStorage.setItem('token', res.data.token);
-    localStorage.setItem('user', JSON.stringify(res.data.user));
-    return res.data;
+    localStorage.setItem('user', JSON.stringify(user));
+    return { ...res.data, user };
   } catch (error) {
     return rejectWithValue(error.message || 'Registration failed');
   }
@@ -36,8 +49,9 @@ export const registerUser = createAsyncThunk('auth/register', async (userData, {
 export const fetchCurrentUser = createAsyncThunk('auth/fetchMe', async (_, { rejectWithValue }) => {
   try {
     const res = await authService.getMe();
-    localStorage.setItem('user', JSON.stringify(res.data));
-    return res.data;
+    const user = normalizeUser(res.data);
+    localStorage.setItem('user', JSON.stringify(user));
+    return user;
   } catch (error) {
     return rejectWithValue(error.message || 'Failed to fetch user session');
   }

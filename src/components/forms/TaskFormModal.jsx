@@ -35,6 +35,8 @@ const TaskFormModal = ({ isOpen, onClose, initialData = null, defaultProjectId =
   }, [isOpen, dispatch]);
 
   useEffect(() => {
+    if (!isOpen) return;
+
     if (initialData) {
       setFormData({
         title: initialData.title || '',
@@ -46,18 +48,29 @@ const TaskFormModal = ({ isOpen, onClose, initialData = null, defaultProjectId =
         dueDate: initialData.dueDate ? initialData.dueDate.split('T')[0] : '',
       });
     } else {
-      setFormData({
+      setFormData((prev) => ({
         title: '',
         description: '',
-        project: defaultProjectId || (projects[0]?._id || ''),
-        assignedTo: users[0]?._id || '',
+        project: defaultProjectId || prev.project || (projects[0]?._id || ''),
+        assignedTo: prev.assignedTo || (users[0]?._id || ''),
         priority: 'Medium',
         status: 'To Do',
         dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      });
+      }));
     }
     setError(null);
-  }, [initialData, defaultProjectId, isOpen, projects, users]);
+  }, [initialData, defaultProjectId, isOpen]);
+
+  // When projects or users finish loading in the background for a new task, fill in default select values if not yet set
+  useEffect(() => {
+    if (isOpen && !initialData) {
+      setFormData((prev) => ({
+        ...prev,
+        project: prev.project || defaultProjectId || (projects[0]?._id || ''),
+        assignedTo: prev.assignedTo || (users[0]?._id || ''),
+      }));
+    }
+  }, [projects, users, isOpen, initialData, defaultProjectId]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });

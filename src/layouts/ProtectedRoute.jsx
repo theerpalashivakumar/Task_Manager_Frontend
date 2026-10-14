@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { Navigate, Outlet } from 'react-router-dom';
 import { ShieldAlert } from 'lucide-react';
 
-const ProtectedRoute = ({ allowedRoles = [] }) => {
+const ProtectedRoute = ({ allowedRoles = [], children }) => {
   const { isAuthenticated, user, loading } = useSelector((state) => state.auth);
 
   if (loading) {
@@ -32,7 +32,7 @@ const ProtectedRoute = ({ allowedRoles = [] }) => {
     );
   }
 
-  return <Outlet />;
+  return children ? children : <Outlet />;
 };
 
 export default ProtectedRoute;

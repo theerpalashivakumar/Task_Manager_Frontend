@@ -50,7 +50,7 @@ const ProjectFormModal = ({ isOpen, onClose, initialData = null }) => {
         startDate: new Date().toISOString().split('T')[0],
         deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
         status: 'Planning',
-        projectManager: currentUser?.role === 'project_manager' ? currentUser._id : '',
+        projectManager: currentUser?.role === 'project_manager' ? (currentUser?._id || currentUser?.id || '') : '',
         members: [],
       });
     }

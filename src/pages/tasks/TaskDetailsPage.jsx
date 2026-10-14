@@ -55,17 +55,20 @@ const TaskDetailsPage = () => {
     };
   }, [id, dispatch]);
 
+  const currentUserId = (user?._id || user?.id)?.toString();
+  const pmId = (currentTask?.project?.projectManager?._id || currentTask?.project?.projectManager)?.toString();
+  const assigneeId = (currentTask?.assignedTo?._id || currentTask?.assignedTo)?.toString();
+
   const canEdit =
     user?.role === 'admin' ||
-    (user?.role === 'project_manager' &&
-      currentTask?.project?.projectManager === user?._id);
+    (user?.role === 'project_manager' && pmId && pmId === currentUserId);
 
-  const isAssignee = currentTask?.assignedTo?._id === user?._id;
+  const isAssignee = assigneeId && currentUserId && assigneeId === currentUserId;
   const canUpdateStatus = canEdit || isAssignee;
 
   // Members of the project + admin + PM can comment
   const isMember = currentTask?.project?.members?.some(
-    (m) => (m._id || m) === user?._id
+    (m) => (m?._id || m)?.toString() === currentUserId
   );
   const canComment = canEdit || isAssignee || isMember;
 

@@ -54,10 +54,11 @@ const ProjectDetailsPage = () => {
     };
   }, [id, dispatch]);
 
+  const pmId = (currentProject?.projectManager?._id || currentProject?.projectManager)?.toString();
+  const currentUserId = (user?._id || user?.id)?.toString();
   const canManage =
     user?.role === 'admin' ||
-    (user?.role === 'project_manager' &&
-      currentProject?.projectManager?._id === user?._id);
+    (user?.role === 'project_manager' && pmId && pmId === currentUserId);
 
   const handleDelete = async () => {
     if (window.confirm('Delete this project and all its associated tasks permanently?')) {
