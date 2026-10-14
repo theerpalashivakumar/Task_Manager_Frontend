@@ -99,8 +99,25 @@ const ProjectFormModal = ({ isOpen, onClose, initialData = null }) => {
       title={initialData ? 'Edit Project' : 'Create New Project'}
       subtitle="Define project milestones, dates, and assign team members"
       maxWidth="max-w-2xl"
+      footer={
+        <>
+          <Button variant="ghost" size="md" onClick={onClose} type="button">
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            form="project-modal-form"
+            variant="primary"
+            size="md"
+            loading={loading}
+            icon={FolderKanban}
+          >
+            {initialData ? 'Save Changes' : 'Create Project'}
+          </Button>
+        </>
+      }
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form id="project-modal-form" onSubmit={handleSubmit} className="space-y-4">
         {error && (
           <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-rose-600 shrink-0" />
@@ -222,22 +239,6 @@ const ProjectFormModal = ({ isOpen, onClose, initialData = null }) => {
               );
             })}
           </div>
-        </div>
-
-        {/* Action Buttons - Always visible */}
-        <div className="sticky bottom-0 bg-white/95 backdrop-blur-md pt-4 pb-1 border-t border-slate-100 flex items-center justify-end gap-3 mt-6">
-          <Button variant="ghost" size="md" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            variant="primary"
-            size="md"
-            loading={loading}
-            icon={FolderKanban}
-          >
-            {initialData ? 'Save Changes' : 'Create Project'}
-          </Button>
         </div>
       </form>
     </Modal>

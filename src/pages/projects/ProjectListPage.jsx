@@ -101,7 +101,7 @@ const ProjectListPage = () => {
         </div>
 
         {/* Status Pills */}
-        <div className="flex items-center gap-1.5 overflow-x-auto w-full md:w-auto pb-1 md:pb-0">
+        <div className="flex items-center gap-1.5 overflow-x-auto w-full md:w-auto pb-1 md:pb-0 no-scrollbar">
           {['', 'Planning', 'Active', 'On Hold', 'Completed'].map((st) => (
             <button
               key={st}

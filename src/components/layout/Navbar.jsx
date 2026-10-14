@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { openExplanationModal } from '../../redux/slices/uiSlice';
+import { openExplanationModal, lockExplanation } from '../../redux/slices/uiSlice';
 import { logoutUser } from '../../redux/slices/authSlice';
 import Badge from '../common/Badge';
 import {
@@ -20,6 +20,7 @@ const Navbar = ({ onMobileMenuToggle }) => {
   const { isExplanationUnlocked } = useSelector((state) => state.ui);
 
   const handleLogout = async () => {
+    dispatch(lockExplanation());
     await dispatch(logoutUser());
     navigate('/login');
   };

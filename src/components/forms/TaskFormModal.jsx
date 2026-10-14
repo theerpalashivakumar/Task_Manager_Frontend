@@ -91,8 +91,25 @@ const TaskFormModal = ({ isOpen, onClose, initialData = null, defaultProjectId =
       title={initialData ? 'Edit Task Details' : 'Create New Task'}
       subtitle="Define actionable requirements, assignee, priority, and deadline"
       maxWidth="max-w-2xl"
+      footer={
+        <>
+          <Button variant="ghost" size="md" onClick={onClose} type="button">
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            form="task-modal-form"
+            variant="primary"
+            size="md"
+            loading={loading}
+            icon={CheckSquare}
+          >
+            {initialData ? 'Save Changes' : 'Create Task'}
+          </Button>
+        </>
+      }
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form id="task-modal-form" onSubmit={handleSubmit} className="space-y-4">
         {error && (
           <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-rose-600 shrink-0" />
@@ -192,21 +209,6 @@ const TaskFormModal = ({ isOpen, onClose, initialData = null, defaultProjectId =
           />
         </div>
 
-        {/* Action Buttons - Always Visible with Sticky Positioning */}
-        <div className="sticky bottom-0 bg-white/95 backdrop-blur-md pt-4 pb-1 border-t border-slate-100 flex items-center justify-end gap-3 mt-6">
-          <Button variant="ghost" size="md" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            variant="primary"
-            size="md"
-            loading={loading}
-            icon={CheckSquare}
-          >
-            {initialData ? 'Save Changes' : 'Create Task'}
-          </Button>
-        </div>
       </form>
     </Modal>
   );

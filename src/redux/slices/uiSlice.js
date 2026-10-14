@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import explanationService from '../../services/explanationService';
-
-const storedExpToken = sessionStorage.getItem('explanation_token');
+import { logoutUser } from './authSlice';
 
 export const verifyExplanationPassword = createAsyncThunk(
   'ui/verifyExplanationPassword',
@@ -32,10 +31,10 @@ const uiSlice = createSlice({
   name: 'ui',
   initialState: {
     toasts: [],
-    // Project Explanation Modal & Data
+    // Project Explanation Modal & Data - strictly locked by default
     isExplanationModalOpen: false,
-    isExplanationUnlocked: Boolean(storedExpToken),
-    explanationToken: storedExpToken,
+    isExplanationUnlocked: false,
+    explanationToken: null,
     explanationData: null,
     explanationLoading: false,
     explanationError: null,
@@ -96,6 +95,15 @@ const uiSlice = createSlice({
       .addCase(fetchExplanationContent.rejected, (state, action) => {
         state.explanationLoading = false;
         state.explanationError = action.payload;
+      })
+
+      // Lock on logout
+      .addCase(logoutUser.fulfilled, (state) => {
+        sessionStorage.removeItem('explanation_token');
+        state.isExplanationUnlocked = false;
+        state.explanationToken = null;
+        state.explanationData = null;
+        state.isExplanationModalOpen = false;
       });
   },
 });

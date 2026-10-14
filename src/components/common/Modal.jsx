@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 
 const Modal = ({
@@ -8,6 +9,7 @@ const Modal = ({
   subtitle,
   children,
   maxWidth = 'max-w-xl',
+  footer = null,
 }) => {
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -25,20 +27,23 @@ const Modal = ({
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 overflow-y-auto p-3 sm:p-6 flex min-h-screen items-center justify-center">
-      {/* Backdrop */}
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+      {/* Full-screen Backdrop */}
       <div
-        className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm transition-opacity duration-200"
+        className="fixed inset-0 bg-slate-950/75 backdrop-blur-sm transition-opacity duration-200"
         onClick={onClose}
+        aria-hidden="true"
       />
 
       {/* Modal Dialog */}
       <div
-        className={`relative w-full ${maxWidth} bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200/90 z-10 flex flex-col max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-4rem)] my-auto overflow-hidden animate-fade-in`}
+        className={`relative w-full ${maxWidth} bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200/90 z-10 flex flex-col max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-3.5rem)] my-auto overflow-hidden animate-fade-in`}
         onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
       >
-        {/* Header */}
+        {/* Header (Pinned) */}
         <div className="px-6 py-4 sm:py-5 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-slate-50 via-white to-slate-50 shrink-0">
           <div className="pr-4">
             <h3 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">{title}</h3>
@@ -53,12 +58,20 @@ const Modal = ({
           </button>
         </div>
 
-        {/* Content Body - Perfectly scrollable so bottom action buttons are never cut off */}
-        <div className="px-6 py-5 overflow-y-auto flex-1 overscroll-contain">
+        {/* Content Body (Scrollable) */}
+        <div className="px-6 py-5 overflow-y-auto flex-1 min-h-0 overscroll-contain">
           {children}
         </div>
+
+        {/* Pinned Footer (Optional) */}
+        {footer && (
+          <div className="px-6 py-3.5 bg-slate-50/90 border-t border-slate-100 flex items-center justify-end gap-3 shrink-0">
+            {footer}
+          </div>
+        )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

@@ -10,7 +10,12 @@
     font-family: 'Inter', system-ui, sans-serif;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: 'Outfit', 'Inter', system-ui, sans-serif;
   }
 }
@@ -34,6 +39,15 @@
   background: #94a3b8;
 }
 
+/* Hide scrollbars utility for smooth horizontal strips */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* Glassmorphism utility */
 .glass-panel {
   background: rgba(255, 255, 255, 0.85);
@@ -54,9 +68,10 @@
     opacity: 0;
     transform: translateY(6px);
   }
+
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: none;
   }
 }
 

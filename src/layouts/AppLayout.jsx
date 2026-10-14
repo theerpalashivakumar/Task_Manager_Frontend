@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { lockExplanation } from '../redux/slices/uiSlice';
 import Sidebar from '../components/layout/Sidebar';
 import Navbar from '../components/layout/Navbar';
 import ViewProjectModal from '../components/layout/ViewProjectModal';
@@ -7,6 +9,17 @@ import ToastContainer from '../components/common/ToastContainer';
 
 const AppLayout = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const location = useLocation();
+  const dispatch = useDispatch();
+  const prevPathRef = useRef(location.pathname);
+
+  useEffect(() => {
+    // If the user was on the architecture docs and navigates away, lock them
+    if (prevPathRef.current === '/project-explanation' && location.pathname !== '/project-explanation') {
+      dispatch(lockExplanation());
+    }
+    prevPathRef.current = location.pathname;
+  }, [location.pathname, dispatch]);
 
   return (
     <div className="flex min-h-screen bg-slate-50">

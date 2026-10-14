@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { openExplanationModal } from '../../redux/slices/uiSlice';
 import {
   LayoutDashboard,
   FolderKanban,
@@ -12,6 +13,7 @@ import {
 } from 'lucide-react';
 
 const Sidebar = ({ isOpen, onClose }) => {
+  const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
   const { isExplanationUnlocked } = useSelector((state) => state.ui);
 
@@ -42,12 +44,12 @@ const Sidebar = ({ isOpen, onClose }) => {
 
       {/* Sidebar Container */}
       <aside
-        className={`fixed lg:static top-0 bottom-0 left-0 z-40 w-64 bg-slate-950 text-white flex flex-col transition-transform duration-300 ease-in-out border-r border-slate-800/80 ${
+        className={`fixed lg:sticky top-0 h-screen w-64 shrink-0 bg-slate-950 text-white flex flex-col z-40 border-r border-slate-800/80 transition-transform duration-300 ease-in-out ${
           isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
       >
         {/* Brand Header */}
-        <div className="h-16 px-6 flex items-center justify-between border-b border-slate-800/80">
+        <div className="h-16 px-6 flex items-center justify-between border-b border-slate-800/80 shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-brand-500/30">
               <FolderKanban className="w-5 h-5 text-white" />
@@ -69,14 +71,20 @@ const Sidebar = ({ isOpen, onClose }) => {
         </div>
 
         {/* Navigation Links */}
-        <nav className="flex-1 px-3.5 py-6 space-y-1.5 overflow-y-auto">
+        <nav className="flex-1 min-h-0 px-3.5 py-4 space-y-1.5 overflow-y-auto no-scrollbar">
           {navItems.map((item) => {
             const Icon = item.icon;
             return (
               <NavLink
                 key={item.path}
                 to={item.path}
-                onClick={onClose}
+                onClick={(e) => {
+                  onClose();
+                  if (item.path === '/project-explanation' && !isExplanationUnlocked) {
+                    e.preventDefault();
+                    dispatch(openExplanationModal());
+                  }
+                }}
                 className={({ isActive }) =>
                   `flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
                     isActive
@@ -105,8 +113,8 @@ const Sidebar = ({ isOpen, onClose }) => {
           })}
         </nav>
 
-        {/* Footer Info */}
-        <div className="p-4 border-t border-slate-800/80">
+        {/* Footer Info - Always pinned to bottom of sidebar */}
+        <div className="p-4 border-t border-slate-800/80 shrink-0">
           <div className="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 text-xs">
             <p className="text-slate-300 font-bold flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-brand-400" />

@@ -43,6 +43,23 @@ const ViewProjectModal = () => {
       title="System Architecture & Portfolio Review"
       subtitle="Restricted technical specifications for evaluators and recruiters"
       maxWidth="max-w-md"
+      footer={
+        <>
+          <Button variant="ghost" onClick={handleClose} type="button">
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            form="explanation-form"
+            variant="primary"
+            loading={explanationLoading}
+            disabled={!password.trim()}
+            icon={KeyRound}
+          >
+            Unlock Documentation
+          </Button>
+        </>
+      }
     >
       <div className="space-y-5">
         <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-gradient-to-r from-brand-50 to-indigo-50/60 border border-brand-100 text-brand-900 shadow-sm">
@@ -57,7 +74,7 @@ const ViewProjectModal = () => {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form id="explanation-form" onSubmit={handleSubmit} className="space-y-4">
           <div className="relative">
             <Input
               label="Access Passkey"
@@ -77,21 +94,6 @@ const ViewProjectModal = () => {
             >
               {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
-          </div>
-
-          <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-3">
-            <Button variant="ghost" onClick={handleClose}>
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              variant="primary"
-              loading={explanationLoading}
-              disabled={!password.trim()}
-              icon={KeyRound}
-            >
-              Unlock Documentation
-            </Button>
           </div>
         </form>
       </div>

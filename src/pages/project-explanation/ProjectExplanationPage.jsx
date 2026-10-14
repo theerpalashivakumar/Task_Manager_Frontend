@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import {
   openExplanationModal,
   fetchExplanationContent,
@@ -31,6 +32,7 @@ import {
 
 const ProjectExplanationPage = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const {
     isExplanationUnlocked,
     explanationData,
@@ -126,17 +128,20 @@ const ProjectExplanationPage = () => {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => dispatch(lockExplanation())}
+            onClick={() => {
+              dispatch(lockExplanation());
+              navigate('/dashboard');
+            }}
             className="bg-white/10 hover:bg-white/20 text-white border-white/20 backdrop-blur-md"
             icon={Lock}
           >
-            Lock Overview
+            Lock & Exit
           </Button>
         </div>
       </div>
 
       {/* Navigation Tabs */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-2 border-b border-slate-200">
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-2 border-b border-slate-200 no-scrollbar">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
