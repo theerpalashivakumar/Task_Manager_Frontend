@@ -141,7 +141,7 @@ const ProjectExplanationPage = () => {
       </div>
 
       {/* Navigation Tabs */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-2 border-b border-slate-200 no-scrollbar">
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-2 border-b border-slate-200 ">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -149,11 +149,10 @@ const ProjectExplanationPage = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
-                isActive
-                  ? 'bg-brand-600 text-white shadow-md shadow-brand-500/25'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-              }`}
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${isActive
+                ? 'bg-brand-600 text-white shadow-md shadow-brand-500/25'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                }`}
             >
               <Icon className="w-3.5 h-3.5" />
               <span>{tab.label}</span>
@@ -188,7 +187,7 @@ const ProjectExplanationPage = () => {
               <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
                 <h4 className="text-xs font-bold text-slate-900">Portfolio Security Requirement</h4>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  Contains a password-protected View Project feature. Visitors must enter passkey <code className="bg-slate-200 px-1.5 py-0.5 rounded text-brand-700 font-mono font-bold">Shiv@818780</code> to unlock technical architecture specifications. Restrictive access ensures non-logged-in visitors cannot bypass verification.
+                  Contains a password-protected View Project feature. Visitors must enter passkey <code className="bg-slate-200 px-1.5 py-0.5 rounded text-brand-700 font-mono font-bold">Personal_key</code> to unlock technical architecture specifications. Restrictive access ensures non-logged-in visitors cannot bypass verification.
                 </p>
               </div>
             </div>
@@ -631,7 +630,7 @@ const ProjectExplanationPage = () => {
                     <td className="p-3 text-emerald-600 font-bold">POST</td>
                     <td className="p-3">/api/project-explanation/verify</td>
                     <td className="p-3 text-slate-500 font-sans">Rate Limited</td>
-                    <td className="p-3 text-slate-700 font-sans">Verify passkey "Shiv@818780"</td>
+                    <td className="p-3 text-slate-700 font-sans">Verify passkey "Personal_key"</td>
                   </tr>
                 </tbody>
               </table>
@@ -672,7 +671,7 @@ const ProjectExplanationPage = () => {
                   <div>PORT=5000</div>
                   <div>MONGODB_URI=your_mongodb_atlas_connection_string</div>
                   <div>JWT_SECRET=your_jwt_secret_key</div>
-                  <div>PROJECT_VIEW_PASSWORD=Shiv@818780</div>
+                  <div>PROJECT_VIEW_PASSWORD=Personal_key</div>
                 </div>
               </div>
             </div>

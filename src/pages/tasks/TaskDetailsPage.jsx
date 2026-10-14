@@ -63,6 +63,12 @@ const TaskDetailsPage = () => {
   const isAssignee = currentTask?.assignedTo?._id === user?._id;
   const canUpdateStatus = canEdit || isAssignee;
 
+  // Members of the project + admin + PM can comment
+  const isMember = currentTask?.project?.members?.some(
+    (m) => (m._id || m) === user?._id
+  );
+  const canComment = canEdit || isAssignee || isMember;
+
   const handleStatusChange = async (newStatus) => {
     try {
       await dispatch(updateTaskStatus({ id, status: newStatus })).unwrap();
@@ -255,27 +261,64 @@ const TaskDetailsPage = () => {
         {/* Comments Feed */}
         {comments.length > 0 ? (
           <div className="space-y-4">
-            {comments.map((c) => (
-              <div
-                key={c._id}
-                className="p-4 rounded-xl bg-slate-50 border border-slate-100 flex items-start gap-3"
-              >
-                <div className="w-8 h-8 rounded-full bg-brand-100 text-brand-700 font-bold flex items-center justify-center shrink-0 text-xs">
-                  {c.author?.name?.charAt(0).toUpperCase()}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-bold text-slate-900">{c.author?.name}</span>
-                    <span className="text-[10px] text-slate-400">
-                      {new Date(c.createdAt).toLocaleString()}
-                    </span>
+            {comments.map((c) => {
+              const isAuthorAdmin = c.author?.role === 'admin';
+              const isAuthorPM = c.author?.role === 'project_manager';
+              const isMe = c.author?._id === user?._id;
+
+              const avatarBg = isAuthorAdmin
+                ? 'bg-rose-100 text-rose-700'
+                : isAuthorPM
+                ? 'bg-violet-100 text-violet-700'
+                : 'bg-brand-100 text-brand-700';
+
+              const roleBadge = isAuthorAdmin
+                ? { label: 'Admin', cls: 'bg-rose-50 text-rose-600 border border-rose-200' }
+                : isAuthorPM
+                ? { label: 'Project Manager', cls: 'bg-violet-50 text-violet-600 border border-violet-200' }
+                : { label: 'Team Member', cls: 'bg-slate-100 text-slate-500 border border-slate-200' };
+
+              return (
+                <div
+                  key={c._id}
+                  className={`p-4 rounded-xl border flex items-start gap-3 ${
+                    isMe
+                      ? 'bg-brand-50/60 border-brand-200/60'
+                      : 'bg-slate-50 border-slate-100'
+                  }`}
+                >
+                  {/* Avatar */}
+                  <div
+                    className={`w-8 h-8 rounded-full font-bold flex items-center justify-center shrink-0 text-xs ${avatarBg}`}
+                  >
+                    {c.author?.name?.charAt(0).toUpperCase()}
                   </div>
-                  <p className="text-xs text-slate-700 mt-1.5 leading-relaxed whitespace-pre-wrap">
-                    {c.comment}
-                  </p>
+
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap mb-1.5">
+                      <span className="text-xs font-bold text-slate-900">
+                        {c.author?.name}
+                        {isMe && (
+                          <span className="ml-1 text-[10px] font-normal text-slate-400">(you)</span>
+                        )}
+                      </span>
+                      {/* Role badge */}
+                      <span
+                        className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${roleBadge.cls}`}
+                      >
+                        {roleBadge.label}
+                      </span>
+                      <span className="ml-auto text-[10px] text-slate-400">
+                        {new Date(c.createdAt).toLocaleString()}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-700 leading-relaxed whitespace-pre-wrap">
+                      {c.comment}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         ) : (
           <p className="text-xs text-slate-400 text-center py-4">
@@ -283,29 +326,34 @@ const TaskDetailsPage = () => {
           </p>
         )}
 
-        {/* Add Comment Form */}
-        <form onSubmit={handleCommentSubmit} className="space-y-3 pt-3 border-t border-slate-100">
-          <textarea
-            rows={3}
-            placeholder="Write a comment or post an update..."
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            className="w-full p-3 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 resize-y"
-          />
-
-          <div className="flex justify-end">
-            <Button
-              type="submit"
-              variant="primary"
-              size="sm"
-              loading={commentSubmitting}
-              disabled={!newComment.trim()}
-              icon={Send}
-            >
-              Post Comment
-            </Button>
-          </div>
-        </form>
+        {/* Add Comment Form — visible to project members, PM, and admin only */}
+        {canComment ? (
+          <form onSubmit={handleCommentSubmit} className="space-y-3 pt-3 border-t border-slate-100">
+            <textarea
+              rows={3}
+              placeholder="Write a comment or post an update..."
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              className="w-full p-3 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 resize-y"
+            />
+            <div className="flex justify-end">
+              <Button
+                type="submit"
+                variant="primary"
+                size="sm"
+                loading={commentSubmitting}
+                disabled={!newComment.trim()}
+                icon={Send}
+              >
+                Post Comment
+              </Button>
+            </div>
+          </form>
+        ) : (
+          <p className="text-xs text-slate-400 text-center pt-3 border-t border-slate-100">
+            You must be a project member to post comments.
+          </p>
+        )}
       </div>
 
       {/* Task Audit Trail */}

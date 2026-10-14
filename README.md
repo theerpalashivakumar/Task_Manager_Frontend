@@ -11,7 +11,7 @@ The frontend application provides a modern, responsive, and accessible interface
 ### Key Capabilities:
 - **Responsive Workspace**: Seamless user experience across mobile phones, tablets, laptops, and desktop screens with custom drawer navigation and glassmorphism cards.
 - **Redux Toolkit State Management**: Centralized store handling slices for `auth`, `projects`, `tasks`, `dashboard`, `users`, and `ui` with async thunks.
-- **Password-Protected "View Project" Feature**: Prominent top-bar button unlocking the protected system architecture documentation upon entering the passkey `Shiv@818780` (verified securely by backend).
+- **Password-Protected "View Project" Feature**: Prominent top-bar button unlocking the protected system architecture documentation upon entering the passkey `Personal_key` (verified securely by backend).
 - **Interactive Dashboard**: Real-time aggregated statistics from MongoDB, overdue alerts, tasks grouped by status, upcoming deadlines, and activity logs.
 - **Sprint Task Lifecycle**: Real-time status transitions (`To Do`, `In Progress`, `In Review`, `Done`), multidimensional filters (project, priority, status, overdue), and instant search.
 - **Project Progress Monitoring**: Visual completion rate trackers, timeline dates, and team member management.
@@ -57,7 +57,7 @@ Task_Manager_Frontend/
 │   │   └── layout/
 │   │       ├── Navbar.jsx      # Header with "View Project" button & user profile
 │   │       ├── Sidebar.jsx     # Responsive navigation sidebar
-│   │       └── ViewProjectModal.jsx # Password entry modal for Shiv@818780
+│   │       └── ViewProjectModal.jsx # Password entry modal for Personal_key
 │   ├── layouts/
 │   │   ├── AppLayout.jsx       # Authenticated layout with Navbar + Sidebar
 │   │   ├── AuthLayout.jsx      # Unauthenticated layout with background gradients
@@ -161,7 +161,7 @@ The application will start at `http://localhost:5173`.
 
 A key feature for portfolio reviewers, recruiters, and evaluators:
 1. Click the **View Project** button in the top navigation bar (or from the login page header).
-2. Enter the passcode: `Shiv@818780`.
+2. Enter the passcode: `Personal_key`.
 3. The password is submitted to the backend API (`/api/project-explanation/verify`), which validates the key and issues a signed, short-lived JWT token.
 4. The client unlocks the **Architecture & Docs** page, presenting:
    - System introduction & business problem solved
