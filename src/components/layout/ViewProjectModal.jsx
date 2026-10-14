@@ -8,13 +8,14 @@ import {
 import Modal from '../common/Modal';
 import Input from '../common/Input';
 import Button from '../common/Button';
-import { Lock, KeyRound, Eye, EyeOff, ShieldCheck, Sparkles } from 'lucide-react';
+import { ShieldCheck, Eye, EyeOff, Sparkles, KeyRound } from 'lucide-react';
 
 const ViewProjectModal = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { isExplanationModalOpen, isExplanationUnlocked, explanationLoading, explanationError } =
-    useSelector((state) => state.ui);
+  const { isExplanationModalOpen, explanationLoading, explanationError } = useSelector(
+    (state) => state.ui
+  );
 
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -40,18 +41,18 @@ const ViewProjectModal = () => {
       isOpen={isExplanationModalOpen}
       onClose={handleClose}
       title="System Architecture & Portfolio Review"
-      subtitle="Restricted access for recruiters, evaluators & developers"
+      subtitle="Restricted technical specifications for evaluators and recruiters"
       maxWidth="max-w-md"
     >
       <div className="space-y-5">
-        <div className="flex items-center gap-3 p-3.5 rounded-xl bg-brand-50 border border-brand-100/80 text-brand-900">
-          <div className="p-2 rounded-lg bg-brand-600 text-white shrink-0 shadow-sm">
+        <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-gradient-to-r from-brand-50 to-indigo-50/60 border border-brand-100 text-brand-900 shadow-sm">
+          <div className="p-2.5 rounded-xl bg-brand-600 text-white shrink-0 shadow-md shadow-brand-500/20">
             <ShieldCheck className="w-5 h-5" />
           </div>
           <div className="text-xs">
-            <p className="font-semibold text-brand-900">Protected Architecture Overview</p>
-            <p className="text-brand-700 mt-0.5">
-              Enter the designated reviewer password to unlock the comprehensive architectural documentation.
+            <p className="font-bold text-brand-950">Protected Technical Overview</p>
+            <p className="text-brand-700 mt-0.5 leading-relaxed">
+              Enter your designated access passkey to view the end-to-end architecture and documentation.
             </p>
           </div>
         </div>
@@ -59,26 +60,26 @@ const ViewProjectModal = () => {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="relative">
             <Input
-              label="Reviewer Access Password"
+              label="Access Passkey"
               id="explanation-password"
               type={showPassword ? 'text' : 'password'}
-              placeholder="Enter password..."
+              placeholder="Enter authorized passkey..."
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               error={explanationError}
-              helperText="Passcode: Shiv@818780"
               required
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-9 text-slate-400 hover:text-slate-600"
+              className="absolute right-3.5 top-9 text-slate-400 hover:text-slate-600 transition-colors p-1"
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
             >
               {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           </div>
 
-          <div className="pt-2 flex items-center justify-end gap-3">
+          <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-3">
             <Button variant="ghost" onClick={handleClose}>
               Cancel
             </Button>
@@ -87,7 +88,7 @@ const ViewProjectModal = () => {
               variant="primary"
               loading={explanationLoading}
               disabled={!password.trim()}
-              icon={Sparkles}
+              icon={KeyRound}
             >
               Unlock Documentation
             </Button>

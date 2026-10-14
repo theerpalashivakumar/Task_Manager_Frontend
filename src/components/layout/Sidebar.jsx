@@ -35,41 +35,41 @@ const Sidebar = ({ isOpen, onClose }) => {
       {/* Mobile Backdrop */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-40 bg-slate-950/60 backdrop-blur-sm lg:hidden transition-opacity"
           onClick={onClose}
         />
       )}
 
       {/* Sidebar Container */}
       <aside
-        className={`fixed lg:static top-0 bottom-0 left-0 z-40 w-64 bg-slate-900 text-white flex flex-col transition-transform duration-300 ease-in-out border-r border-slate-800 ${
+        className={`fixed lg:static top-0 bottom-0 left-0 z-40 w-64 bg-slate-950 text-white flex flex-col transition-transform duration-300 ease-in-out border-r border-slate-800/80 ${
           isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
       >
         {/* Brand Header */}
-        <div className="h-16 px-6 flex items-center justify-between border-b border-slate-800">
+        <div className="h-16 px-6 flex items-center justify-between border-b border-slate-800/80">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-brand-500/30">
               <FolderKanban className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="text-base font-extrabold tracking-tight text-white leading-tight">
+              <span className="text-base font-extrabold tracking-tight text-white leading-tight block">
                 TeamPulse
-              </h1>
-              <span className="text-[10px] text-slate-400 font-medium">Enterprise MERN</span>
+              </span>
+              <span className="text-[10px] text-slate-400 font-medium">Workspace OS</span>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800"
+            className="lg:hidden p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/80 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Navigation Links */}
-        <nav className="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
+        <nav className="flex-1 px-3.5 py-6 space-y-1.5 overflow-y-auto">
           {navItems.map((item) => {
             const Icon = item.icon;
             return (
@@ -78,10 +78,10 @@ const Sidebar = ({ isOpen, onClose }) => {
                 to={item.path}
                 onClick={onClose}
                 className={({ isActive }) =>
-                  `flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                  `flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
                     isActive
-                      ? 'bg-brand-600 text-white shadow-md shadow-brand-600/20'
-                      : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/60'
+                      ? 'bg-gradient-to-r from-brand-600 to-indigo-600 text-white shadow-md shadow-brand-600/25'
+                      : 'text-slate-400 hover:text-slate-100 hover:bg-slate-900'
                   }`
                 }
               >
@@ -91,10 +91,10 @@ const Sidebar = ({ isOpen, onClose }) => {
                 </div>
                 {item.badge && (
                   <span
-                    className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${
+                    className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
                       isExplanationUnlocked
-                        ? 'bg-emerald-500/20 text-emerald-400'
-                        : 'bg-amber-500/20 text-amber-400'
+                        ? 'bg-emerald-500/20 text-emerald-300'
+                        : 'bg-amber-500/20 text-amber-300'
                     }`}
                   >
                     {item.badge}
@@ -106,14 +106,14 @@ const Sidebar = ({ isOpen, onClose }) => {
         </nav>
 
         {/* Footer Info */}
-        <div className="p-4 border-t border-slate-800">
-          <div className="p-3 rounded-xl bg-slate-800/60 border border-slate-700/50 text-xs">
-            <p className="text-slate-300 font-semibold flex items-center gap-1.5">
+        <div className="p-4 border-t border-slate-800/80">
+          <div className="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 text-xs">
+            <p className="text-slate-300 font-bold flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-brand-400" />
-              Role Permissions
+              Role Authorization
             </p>
-            <p className="text-slate-400 mt-1 capitalize">
-              Role: <span className="text-white font-medium">{user?.role?.replace('_', ' ')}</span>
+            <p className="text-slate-400 mt-1 capitalize text-[11px]">
+              Active: <span className="text-white font-semibold">{user?.role?.replace('_', ' ')}</span>
             </p>
           </div>
         </div>

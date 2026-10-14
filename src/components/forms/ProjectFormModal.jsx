@@ -6,6 +6,7 @@ import { addToast } from '../../redux/slices/uiSlice';
 import Modal from '../common/Modal';
 import Input from '../common/Input';
 import Button from '../common/Button';
+import { FolderKanban } from 'lucide-react';
 
 const ProjectFormModal = ({ isOpen, onClose, initialData = null }) => {
   const dispatch = useDispatch();
@@ -101,7 +102,8 @@ const ProjectFormModal = ({ isOpen, onClose, initialData = null }) => {
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
-          <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium">
+          <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-rose-600 shrink-0" />
             {error}
           </div>
         )}
@@ -174,7 +176,7 @@ const ProjectFormModal = ({ isOpen, onClose, initialData = null }) => {
                 .filter((u) => u.role === 'admin' || u.role === 'project_manager')
                 .map((u) => (
                   <option key={u._id} value={u._id}>
-                    {u.name} ({u.role})
+                    {u.name} ({u.role?.replace('_', ' ')})
                   </option>
                 ))}
             </Input>
@@ -193,7 +195,7 @@ const ProjectFormModal = ({ isOpen, onClose, initialData = null }) => {
           <label className="block text-sm font-medium text-slate-700 mb-1.5">
             Assign Team Members
           </label>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-40 overflow-y-auto p-2 border border-slate-200 rounded-xl bg-slate-50/50">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-36 overflow-y-auto p-2 border border-slate-200 rounded-xl bg-slate-50/50">
             {users.map((u) => {
               const isSelected = formData.members.includes(u._id);
               return (
@@ -202,7 +204,7 @@ const ProjectFormModal = ({ isOpen, onClose, initialData = null }) => {
                   onClick={() => handleMemberToggle(u._id)}
                   className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer text-xs transition-colors border ${
                     isSelected
-                      ? 'bg-brand-50 border-brand-200 text-brand-900 font-medium'
+                      ? 'bg-brand-50 border-brand-200 text-brand-900 font-semibold'
                       : 'bg-white border-slate-200/80 text-slate-700 hover:bg-slate-100'
                   }`}
                 >
@@ -222,11 +224,18 @@ const ProjectFormModal = ({ isOpen, onClose, initialData = null }) => {
           </div>
         </div>
 
-        <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
-          <Button variant="ghost" onClick={onClose}>
+        {/* Action Buttons - Always visible */}
+        <div className="sticky bottom-0 bg-white/95 backdrop-blur-md pt-4 pb-1 border-t border-slate-100 flex items-center justify-end gap-3 mt-6">
+          <Button variant="ghost" size="md" onClick={onClose}>
             Cancel
           </Button>
-          <Button type="submit" variant="primary" loading={loading}>
+          <Button
+            type="submit"
+            variant="primary"
+            size="md"
+            loading={loading}
+            icon={FolderKanban}
+          >
             {initialData ? 'Save Changes' : 'Create Project'}
           </Button>
         </div>

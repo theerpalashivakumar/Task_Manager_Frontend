@@ -7,6 +7,7 @@ import { addToast } from '../../redux/slices/uiSlice';
 import Modal from '../common/Modal';
 import Input from '../common/Input';
 import Button from '../common/Button';
+import { CheckSquare } from 'lucide-react';
 
 const TaskFormModal = ({ isOpen, onClose, initialData = null, defaultProjectId = null }) => {
   const dispatch = useDispatch();
@@ -87,13 +88,14 @@ const TaskFormModal = ({ isOpen, onClose, initialData = null, defaultProjectId =
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={initialData ? 'Edit Task' : 'Create New Task'}
+      title={initialData ? 'Edit Task Details' : 'Create New Task'}
       subtitle="Define actionable requirements, assignee, priority, and deadline"
-      maxWidth="max-w-xl"
+      maxWidth="max-w-2xl"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
-          <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium">
+          <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-rose-600 shrink-0" />
             {error}
           </div>
         )}
@@ -112,7 +114,7 @@ const TaskFormModal = ({ isOpen, onClose, initialData = null, defaultProjectId =
           name="description"
           type="textarea"
           rows={3}
-          placeholder="Detailed task instructions..."
+          placeholder="Detailed task instructions and acceptance criteria..."
           value={formData.description}
           onChange={handleChange}
           required
@@ -153,7 +155,7 @@ const TaskFormModal = ({ isOpen, onClose, initialData = null, defaultProjectId =
           </Input>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
           <Input
             label="Priority"
             name="priority"
@@ -190,11 +192,18 @@ const TaskFormModal = ({ isOpen, onClose, initialData = null, defaultProjectId =
           />
         </div>
 
-        <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
-          <Button variant="ghost" onClick={onClose}>
+        {/* Action Buttons - Always Visible with Sticky Positioning */}
+        <div className="sticky bottom-0 bg-white/95 backdrop-blur-md pt-4 pb-1 border-t border-slate-100 flex items-center justify-end gap-3 mt-6">
+          <Button variant="ghost" size="md" onClick={onClose}>
             Cancel
           </Button>
-          <Button type="submit" variant="primary" loading={loading}>
+          <Button
+            type="submit"
+            variant="primary"
+            size="md"
+            loading={loading}
+            icon={CheckSquare}
+          >
             {initialData ? 'Save Changes' : 'Create Task'}
           </Button>
         </div>
