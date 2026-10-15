@@ -8,13 +8,13 @@ import {
 import { addToast } from '../../redux/slices/uiSlice';
 import userService from '../../services/userService';
 import Badge from '../../components/common/Badge';
-import Button from '../../components/common/Button';
 import Pagination from '../../components/common/Pagination';
-import { Users, Search, Shield, UserCheck, UserX, Trash2 } from 'lucide-react';
+import { Search, UserCheck, UserX, Trash2 } from 'lucide-react';
+import { useCallback } from 'react';
 
 const UserManagementPage = () => {
   const dispatch = useDispatch();
-  const { items: users, pagination, loading } = useSelector((state) => state.users);
+  const { items: users, pagination } = useSelector((state) => state.users);
   const { user: currentUser } = useSelector((state) => state.auth);
 
   const [search, setSearch] = useState('');
@@ -22,7 +22,7 @@ const UserManagementPage = () => {
 
   const isAdmin = currentUser?.role === 'admin';
 
-  const loadUsers = (page = 1) => {
+  const loadUsers = useCallback((page = 1) => {
     dispatch(
       fetchUsers({
         page,
@@ -31,14 +31,14 @@ const UserManagementPage = () => {
         role: roleFilter,
       })
     );
-  };
+  }, [dispatch, search, roleFilter]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       loadUsers(1);
     }, 300);
     return () => clearTimeout(timer);
-  }, [search, roleFilter]);
+  }, [loadUsers]);
 
   const handleRoleChange = async (userId, newRole) => {
     try {
@@ -174,16 +174,14 @@ const UserManagementPage = () => {
 
                     <td className="py-4 px-6">
                       <span
-                        className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full font-medium ${
-                          u.isActive
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full font-medium ${u.isActive
                             ? 'bg-emerald-50 text-emerald-700'
                             : 'bg-rose-50 text-rose-700'
-                        }`}
+                          }`}
                       >
                         <span
-                          className={`w-1.5 h-1.5 rounded-full ${
-                            u.isActive ? 'bg-emerald-500' : 'bg-rose-500'
-                          }`}
+                          className={`w-1.5 h-1.5 rounded-full ${u.isActive ? 'bg-emerald-500' : 'bg-rose-500'
+                            }`}
                         />
                         {u.isActive ? 'Active' : 'Suspended'}
                       </span>
@@ -199,11 +197,10 @@ const UserManagementPage = () => {
                           <div className="flex items-center justify-end gap-2">
                             <button
                               onClick={() => handleStatusToggle(u._id, u.isActive)}
-                              className={`p-1.5 rounded-lg text-xs font-semibold transition-colors ${
-                                u.isActive
+                              className={`p-1.5 rounded-lg text-xs font-semibold transition-colors ${u.isActive
                                   ? 'text-amber-600 hover:bg-amber-50'
                                   : 'text-emerald-600 hover:bg-emerald-50'
-                              }`}
+                                }`}
                               title={u.isActive ? 'Deactivate Account' : 'Activate Account'}
                             >
                               {u.isActive ? (

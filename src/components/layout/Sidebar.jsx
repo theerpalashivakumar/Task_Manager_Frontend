@@ -10,12 +10,17 @@ import {
   ShieldCheck,
   X,
   Sparkles,
+  Globe,
 } from 'lucide-react';
 
 const Sidebar = ({ isOpen, onClose }) => {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
   const { isExplanationUnlocked } = useSelector((state) => state.ui);
+
+  const apiDocsUrl =
+    (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api').replace(/\/api$/, '') +
+    '/api/docs';
 
   const navItems = [
     { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
@@ -44,9 +49,8 @@ const Sidebar = ({ isOpen, onClose }) => {
 
       {/* Sidebar Container */}
       <aside
-        className={`fixed lg:sticky top-0 h-screen w-64 shrink-0 bg-slate-950 text-white flex flex-col z-40 border-r border-slate-800/80 transition-transform duration-300 ease-in-out ${
-          isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-        }`}
+        className={`fixed lg:sticky top-0 h-screen w-64 shrink-0 bg-slate-950 text-white flex flex-col z-40 border-r border-slate-800/80 transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+          }`}
       >
         {/* Brand Header */}
         <div className="h-16 px-6 flex items-center justify-between border-b border-slate-800/80 shrink-0">
@@ -86,10 +90,9 @@ const Sidebar = ({ isOpen, onClose }) => {
                   }
                 }}
                 className={({ isActive }) =>
-                  `flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
-                    isActive
-                      ? 'bg-gradient-to-r from-brand-600 to-indigo-600 text-white shadow-md shadow-brand-600/25'
-                      : 'text-slate-400 hover:text-slate-100 hover:bg-slate-900'
+                  `flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all ${isActive
+                    ? 'bg-gradient-to-r from-brand-600 to-indigo-600 text-white shadow-md shadow-brand-600/25'
+                    : 'text-slate-400 hover:text-slate-100 hover:bg-slate-900'
                   }`
                 }
               >
@@ -99,11 +102,10 @@ const Sidebar = ({ isOpen, onClose }) => {
                 </div>
                 {item.badge && (
                   <span
-                    className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
-                      isExplanationUnlocked
+                    className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${isExplanationUnlocked
                         ? 'bg-emerald-500/20 text-emerald-300'
                         : 'bg-amber-500/20 text-amber-300'
-                    }`}
+                      }`}
                   >
                     {item.badge}
                   </span>
@@ -111,6 +113,21 @@ const Sidebar = ({ isOpen, onClose }) => {
               </NavLink>
             );
           })}
+
+          {/* <a
+            href={apiDocsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-slate-400 hover:text-slate-100 hover:bg-slate-900 transition-all mt-3 border-t border-slate-800/60 pt-3"
+          >
+            <div className="flex items-center gap-3">
+              <Globe className="w-4 h-4 text-indigo-400 shrink-0" />
+              <span>Swagger API Docs</span>
+            </div>
+            <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+              OpenAPI
+            </span>
+          </a> */}
         </nav>
 
         {/* Footer Info - Always pinned to bottom of sidebar */}

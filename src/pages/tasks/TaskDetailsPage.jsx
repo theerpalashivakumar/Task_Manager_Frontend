@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -14,10 +14,8 @@ import TaskFormModal from '../../components/forms/TaskFormModal';
 import Badge from '../../components/common/Badge';
 import Button from '../../components/common/Button';
 import {
-  CheckSquare,
   Calendar,
   User,
-  FolderKanban,
   MessageSquare,
   Activity,
   ArrowLeft,
@@ -41,6 +39,8 @@ const TaskDetailsPage = () => {
   const [activities, setActivities] = useState([]);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
+  const now = useMemo(() => Date.now(), []);
+
   useEffect(() => {
     dispatch(fetchTaskById(id));
 
@@ -48,7 +48,7 @@ const TaskDetailsPage = () => {
     taskService
       .getTaskActivity(id)
       .then((res) => setActivities(res.data || []))
-      .catch(() => {});
+      .catch(() => { });
 
     return () => {
       dispatch(clearCurrentTask());
@@ -132,8 +132,9 @@ const TaskDetailsPage = () => {
     );
   }
 
+  // const now = useMemo(() => Date.now(), []);
   const isOverdue =
-    new Date(currentTask.dueDate) < new Date() && currentTask.status !== 'Done';
+    new Date(currentTask.dueDate).getTime() < now && currentTask.status !== 'Done';
 
   return (
     <div className="space-y-8 animate-fade-in max-w-5xl mx-auto">
@@ -199,11 +200,10 @@ const TaskDetailsPage = () => {
                 <button
                   key={st}
                   onClick={() => handleStatusChange(st)}
-                  className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
-                    currentTask.status === st
-                      ? 'bg-brand-600 text-white shadow-sm'
-                      : 'text-slate-600 hover:bg-slate-200/60'
-                  }`}
+                  className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${currentTask.status === st
+                    ? 'bg-brand-600 text-white shadow-sm'
+                    : 'text-slate-600 hover:bg-slate-200/60'
+                    }`}
                 >
                   {st}
                 </button>
@@ -235,9 +235,8 @@ const TaskDetailsPage = () => {
           <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100">
             <span className="text-slate-400 block font-medium">Due Date</span>
             <div
-              className={`flex items-center gap-2 mt-1.5 font-semibold ${
-                isOverdue ? 'text-rose-600 font-bold' : 'text-slate-800'
-              }`}
+              className={`flex items-center gap-2 mt-1.5 font-semibold ${isOverdue ? 'text-rose-600 font-bold' : 'text-slate-800'
+                }`}
             >
               <Calendar className="w-4 h-4" />
               <span>{new Date(currentTask.dueDate).toLocaleDateString()}</span>
@@ -272,23 +271,22 @@ const TaskDetailsPage = () => {
               const avatarBg = isAuthorAdmin
                 ? 'bg-rose-100 text-rose-700'
                 : isAuthorPM
-                ? 'bg-violet-100 text-violet-700'
-                : 'bg-brand-100 text-brand-700';
+                  ? 'bg-violet-100 text-violet-700'
+                  : 'bg-brand-100 text-brand-700';
 
               const roleBadge = isAuthorAdmin
                 ? { label: 'Admin', cls: 'bg-rose-50 text-rose-600 border border-rose-200' }
                 : isAuthorPM
-                ? { label: 'Project Manager', cls: 'bg-violet-50 text-violet-600 border border-violet-200' }
-                : { label: 'Team Member', cls: 'bg-slate-100 text-slate-500 border border-slate-200' };
+                  ? { label: 'Project Manager', cls: 'bg-violet-50 text-violet-600 border border-violet-200' }
+                  : { label: 'Team Member', cls: 'bg-slate-100 text-slate-500 border border-slate-200' };
 
               return (
                 <div
                   key={c._id}
-                  className={`p-4 rounded-xl border flex items-start gap-3 ${
-                    isMe
-                      ? 'bg-brand-50/60 border-brand-200/60'
-                      : 'bg-slate-50 border-slate-100'
-                  }`}
+                  className={`p-4 rounded-xl border flex items-start gap-3 ${isMe
+                    ? 'bg-brand-50/60 border-brand-200/60'
+                    : 'bg-slate-50 border-slate-100'
+                    }`}
                 >
                   {/* Avatar */}
                   <div

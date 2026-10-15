@@ -9,8 +9,6 @@ import {
   Sparkles,
   Unlock,
   LogOut,
-  FolderKanban,
-  CheckCircle,
 } from 'lucide-react';
 
 const Navbar = ({ onMobileMenuToggle }) => {

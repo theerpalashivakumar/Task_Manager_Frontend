@@ -7,24 +7,18 @@ import {
   lockExplanation,
 } from '../../redux/slices/uiSlice';
 import Button from '../../components/common/Button';
-import Badge from '../../components/common/Badge';
 import {
   ShieldCheck,
   Lock,
-  Unlock,
   Layers,
   Database,
   Cpu,
   Server,
   FolderTree,
-  FileCode,
   KeyRound,
   CheckCircle2,
   Terminal,
-  Activity,
-  Code2,
   Globe,
-  GitBranch,
   FileText,
   Workflow,
   Sparkles,
@@ -37,7 +31,6 @@ const ProjectExplanationPage = () => {
     isExplanationUnlocked,
     explanationData,
     explanationLoading,
-    explanationError,
   } = useSelector((state) => state.ui);
 
   const [activeTab, setActiveTab] = useState('prompt');

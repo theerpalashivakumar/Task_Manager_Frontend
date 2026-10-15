@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { fetchProjects, deleteProject } from '../../redux/slices/projectSlice';
@@ -12,16 +12,14 @@ import {
   Plus,
   Search,
   Calendar,
-  Users,
   Edit2,
   Trash2,
-  CheckCircle2,
   ArrowRight,
 } from 'lucide-react';
 
 const ProjectListPage = () => {
   const dispatch = useDispatch();
-  const { items: projects, pagination, loading, error } = useSelector((state) => state.projects);
+  const { items: projects, pagination, loading } = useSelector((state) => state.projects);
   const { user } = useSelector((state) => state.auth);
 
   const [search, setSearch] = useState('');
@@ -30,8 +28,9 @@ const ProjectListPage = () => {
   const [editingProject, setEditingProject] = useState(null);
 
   const canManage = user?.role === 'admin' || user?.role === 'project_manager';
+  const now = useMemo(() => Date.now(), []);
 
-  const loadProjects = (page = 1) => {
+  const loadProjects = useCallback((page = 1) => {
     dispatch(
       fetchProjects({
         page,
@@ -40,14 +39,14 @@ const ProjectListPage = () => {
         status: statusFilter,
       })
     );
-  };
+  }, [dispatch, search, statusFilter]);
 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
       loadProjects(1);
     }, 300);
     return () => clearTimeout(delayDebounce);
-  }, [search, statusFilter]);
+  }, [loadProjects]);
 
   const handleDelete = async (id, name) => {
     if (window.confirm(`Are you sure you want to delete project "${name}"? All associated tasks will be removed.`)) {
@@ -100,21 +99,19 @@ const ProjectListPage = () => {
           />
         </div>
 
-        {/* Status Pills */}
-        <div className="flex items-center gap-1.5 overflow-x-auto w-full md:w-auto pb-1 md:pb-0 no-scrollbar">
-          {['', 'Planning', 'Active', 'On Hold', 'Completed'].map((st) => (
-            <button
-              key={st}
-              onClick={() => setStatusFilter(st)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
-                statusFilter === st
-                  ? 'bg-brand-600 text-white shadow-sm'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-              }`}
-            >
-              {st || 'All Projects'}
-            </button>
-          ))}
+        {/* Filter by Status */}
+        <div className="flex items-center gap-2 w-full md:w-auto">
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="w-full md:w-48 px-3 py-2 text-xs rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 text-slate-700"
+          >
+            <option value="">All Statuses</option>
+            <option value="Planning">Planning</option>
+            <option value="Active">Active</option>
+            <option value="On Hold">On Hold</option>
+            <option value="Completed">Completed</option>
+          </select>
         </div>
       </div>
 
@@ -132,7 +129,8 @@ const ProjectListPage = () => {
             const currentUserId = (user?._id || user?.id)?.toString();
             const isPM = pmId && currentUserId && pmId === currentUserId;
             const canEdit = user?.role === 'admin' || isPM;
-            const isDeadlinePassed = new Date(proj.deadline) < new Date() && proj.status !== 'Completed';
+            const isDeadlinePassed =
+              new Date(proj.deadline).getTime() < now && proj.status !== 'Completed';
 
             return (
               <div
@@ -144,75 +142,82 @@ const ProjectListPage = () => {
                     <Badge variant={proj.status} size="xs">
                       {proj.status}
                     </Badge>
+                    {isDeadlinePassed && (
+                      <span className="text-[10px] font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200">
+                        Deadline Passed
+                      </span>
+                    )}
+                  </div>
+
+                  <Link
+                    to={`/projects/${proj._id}`}
+                    className="text-base font-bold text-slate-900 hover:text-brand-600 transition-colors line-clamp-1 block"
+                  >
+                    {proj.name}
+                  </Link>
+
+                  <p className="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">
+                    {proj.description || 'No description provided.'}
+                  </p>
+                </div>
+
+                <div className="mt-6 space-y-4 pt-4 border-t border-slate-100">
+                  {/* Progress Bar */}
+                  <div>
+                    <div className="flex justify-between text-xs font-semibold mb-1.5">
+                      <span className="text-slate-500">Sprint Progress</span>
+                      <span className="text-slate-800">{proj.completionPercentage || 0}%</span>
+                    </div>
+                    <div className="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-brand-500 transition-all duration-500"
+                        style={{ width: `${proj.completionPercentage || 0}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Dates & Footer info */}
+                  <div className="flex items-center justify-between text-xs text-slate-400">
+                    <span className="flex items-center gap-1">
+                      <Calendar className="w-3.5 h-3.5" />
+                      Due {new Date(proj.deadline).toLocaleDateString()}
+                    </span>
+
+                    <span className="text-[11px] font-medium text-slate-500 truncate max-w-[120px]">
+                      PM: {proj.projectManager?.name?.split(' ')[0] || 'Unassigned'}
+                    </span>
+                  </div>
+
+                  {/* Action Bar */}
+                  <div className="flex items-center justify-between pt-1">
+                    <Link
+                      to={`/projects/${proj._id}`}
+                      className="inline-flex items-center gap-1 text-xs font-bold text-brand-600 hover:text-brand-700"
+                    >
+                      View Project <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
+
                     {canEdit && (
-                      <div className="flex items-center gap-1 text-slate-400">
+                      <div className="flex items-center gap-1.5">
                         <button
                           onClick={() => {
                             setEditingProject(proj);
                             setIsModalOpen(true);
                           }}
-                          className="p-1 hover:text-slate-700 rounded-md"
+                          className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors"
                           title="Edit Project"
                         >
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
                         <button
                           onClick={() => handleDelete(proj._id, proj.name)}
-                          className="p-1 hover:text-rose-600 rounded-md"
+                          className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition-colors"
                           title="Delete Project"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     )}
-                  </div>
-
-                  <Link
-                    to={`/projects/${proj._id}`}
-                    className="text-base font-bold text-slate-900 hover:text-brand-600 transition-colors line-clamp-1"
-                  >
-                    {proj.name}
-                  </Link>
-
-                  <p className="text-xs text-slate-500 mt-2 line-clamp-2 leading-relaxed">
-                    {proj.description}
-                  </p>
-                </div>
-
-                {/* Progress bar */}
-                <div className="my-4 pt-3 border-t border-slate-100">
-                  <div className="flex justify-between text-xs font-semibold text-slate-700 mb-1.5">
-                    <span>Progress</span>
-                    <span>{proj.completionPercentage || 0}%</span>
-                  </div>
-                  <div className="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
-                    <div
-                      className="h-full bg-brand-600 rounded-full transition-all duration-500"
-                      style={{ width: `${proj.completionPercentage || 0}%` }}
-                    />
-                  </div>
-                </div>
-
-                {/* Footer with dates & members */}
-                <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-                  <div className="flex items-center gap-1.5">
-                    <Calendar className="w-3.5 h-3.5" />
-                    <span className={isDeadlinePassed ? 'text-rose-600 font-bold' : ''}>
-                      {new Date(proj.deadline).toLocaleDateString()}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[11px] font-medium text-slate-400">
-                      PM: {proj.projectManager?.name?.split(' ')[0]}
-                    </span>
-                    <Link
-                      to={`/projects/${proj._id}`}
-                      className="p-1.5 rounded-lg bg-slate-100 hover:bg-brand-50 hover:text-brand-600 text-slate-600 transition-colors"
-                      title="View Details"
-                    >
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </Link>
                   </div>
                 </div>
               </div>
@@ -225,19 +230,16 @@ const ProjectListPage = () => {
           <h3 className="text-base font-bold text-slate-800">No projects found</h3>
           <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
             {search || statusFilter
-              ? 'Try modifying your search query or status filter.'
-              : 'Create your first project to organize tasks and assign team members.'}
+              ? 'Try modifying your search keywords or clear active filters.'
+              : 'Create a new project to start scheduling tasks and milestones.'}
           </p>
         </div>
       )}
 
       {/* Pagination */}
-      <Pagination
-        pagination={pagination}
-        onPageChange={(newPage) => loadProjects(newPage)}
-      />
+      <Pagination pagination={pagination} onPageChange={(p) => loadProjects(p)} />
 
-      {/* Modal */}
+      {/* Create / Edit Project Modal */}
       <ProjectFormModal
         isOpen={isModalOpen}
         onClose={() => {

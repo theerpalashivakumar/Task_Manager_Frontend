@@ -9,13 +9,12 @@ import {
 import { fetchTasks } from '../../redux/slices/taskSlice';
 import { addToast } from '../../redux/slices/uiSlice';
 import projectService from '../../services/projectService';
+import aiService from '../../services/aiService';
 import ProjectFormModal from '../../components/forms/ProjectFormModal';
 import TaskFormModal from '../../components/forms/TaskFormModal';
 import Badge from '../../components/common/Badge';
 import Button from '../../components/common/Button';
 import {
-  FolderKanban,
-  Calendar,
   Users,
   CheckSquare,
   Plus,
@@ -23,7 +22,9 @@ import {
   Trash2,
   Activity,
   ArrowLeft,
-  Clock,
+  Sparkles,
+  CheckCircle2,
+  AlertTriangle,
 } from 'lucide-react';
 
 const ProjectDetailsPage = () => {
@@ -38,6 +39,10 @@ const ProjectDetailsPage = () => {
   const [activities, setActivities] = useState([]);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+
+  // AI Project Analysis state
+  const [aiAnalysis, setAiAnalysis] = useState(null);
+  const [aiLoading, setAiLoading] = useState(false);
 
   useEffect(() => {
     dispatch(fetchProjectById(id));
@@ -59,6 +64,19 @@ const ProjectDetailsPage = () => {
   const canManage =
     user?.role === 'admin' ||
     (user?.role === 'project_manager' && pmId && pmId === currentUserId);
+
+  const handleRunAiAnalysis = async () => {
+    setAiLoading(true);
+    try {
+      const res = await aiService.analyzeProject(id);
+      setAiAnalysis(res.data);
+      dispatch(addToast({ type: 'success', message: '✨ AI Risk & Health analysis complete' }));
+    } catch (err) {
+      dispatch(addToast({ type: 'error', message: err.message || 'AI Analysis failed' }));
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   const handleDelete = async () => {
     if (window.confirm('Delete this project and all its associated tasks permanently?')) {
@@ -98,46 +116,70 @@ const ProjectDetailsPage = () => {
 
   return (
     <div className="space-y-8 animate-fade-in">
-      {/* Top Navigation Back */}
-      <div className="flex items-center justify-between">
+      {/* Top Navigation & Action Controls */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <Link
           to="/projects"
           className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors"
         >
-          <ArrowLeft className="w-4 h-4" /> Back to Projects
+          <ArrowLeft className="w-3.5 h-3.5" /> Back to Projects
         </Link>
 
-        {canManage && (
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              icon={Edit2}
-              onClick={() => setIsEditModalOpen(true)}
-            >
-              Edit
-            </Button>
-            <Button variant="danger" size="sm" icon={Trash2} onClick={handleDelete}>
-              Delete
-            </Button>
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          {/* AI Project Audit Button */}
+          <Button
+            variant="outline"
+            size="sm"
+            icon={Sparkles}
+            loading={aiLoading}
+            onClick={handleRunAiAnalysis}
+            className="border-brand-200 bg-brand-50/60 text-brand-700 hover:bg-brand-100"
+          >
+            {aiLoading ? 'Analyzing...' : 'AI Risk Audit'}
+          </Button>
+
+          {canManage && (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                icon={Edit2}
+                onClick={() => setIsEditModalOpen(true)}
+              >
+                Edit Details
+              </Button>
+              <Button
+                variant="danger"
+                size="sm"
+                icon={Trash2}
+                onClick={handleDelete}
+              >
+                Delete
+              </Button>
+            </>
+          )}
+        </div>
       </div>
 
-      {/* Main Project Header Card */}
-      <div className="p-6 sm:p-8 rounded-2xl bg-white border border-slate-200/80 shadow-sm">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-6">
-          <div>
-            <div className="flex items-center gap-3">
-              <h2 className="text-2xl font-black text-slate-900 tracking-tight">
-                {currentProject.name}
-              </h2>
+      {/* Project Overview Card */}
+      <div className="p-6 sm:p-8 rounded-3xl bg-white border border-slate-200/80 shadow-sm space-y-6">
+        <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+          <div className="space-y-2 max-w-2xl">
+            <div className="flex items-center gap-2.5">
               <Badge variant={currentProject.status} size="sm">
                 {currentProject.status}
               </Badge>
+              {currentProject.isArchived && (
+                <span className="text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                  Archived
+                </span>
+              )}
             </div>
-            <p className="text-xs text-slate-500 mt-2 max-w-2xl leading-relaxed">
-              {currentProject.description}
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+              {currentProject.name}
+            </h1>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              {currentProject.description || 'No description provided.'}
             </p>
           </div>
 
@@ -220,6 +262,65 @@ const ProjectDetailsPage = () => {
           </div>
         </div>
       </div>
+
+      {/* AI Health & Risk Analysis Panel (When triggered) */}
+      {aiAnalysis && (
+        <div className="p-6 rounded-2xl bg-gradient-to-r from-indigo-950 via-slate-900 to-slate-950 text-white shadow-xl border border-indigo-900 animate-fade-in space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="p-2 rounded-xl bg-indigo-500/20 text-indigo-300">
+                <Sparkles className="w-5 h-5" />
+              </span>
+              <div>
+                <h3 className="text-sm font-bold text-white">AI Health & Risk Evaluation</h3>
+                <p className="text-[11px] text-slate-400">
+                  Calculated based on sprint velocity, deadlines, and active task statuses
+                </p>
+              </div>
+            </div>
+
+            <span
+              className={`px-3 py-1 rounded-full text-xs font-bold border ${
+                aiAnalysis.riskLevel === 'Critical'
+                  ? 'bg-rose-500/20 text-rose-300 border-rose-500/40'
+                  : aiAnalysis.riskLevel === 'High'
+                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                  : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+              }`}
+            >
+              Risk Level: {aiAnalysis.riskLevel}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs pt-2">
+            <div className="p-4 rounded-xl bg-slate-800/60 border border-slate-700 space-y-2">
+              <span className="font-bold text-indigo-300 flex items-center gap-1.5 uppercase text-[10px] tracking-wider">
+                <AlertTriangle className="w-3.5 h-3.5 text-amber-400" /> Risk Factors
+              </span>
+              <ul className="space-y-1 text-slate-300">
+                {aiAnalysis.riskFactors.map((rf, idx) => (
+                  <li key={idx} className="flex items-start gap-1.5">
+                    <span className="text-amber-400 shrink-0">•</span> {rf}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="p-4 rounded-xl bg-slate-800/60 border border-slate-700 space-y-2">
+              <span className="font-bold text-emerald-300 flex items-center gap-1.5 uppercase text-[10px] tracking-wider">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Recommended Actions
+              </span>
+              <ul className="space-y-1 text-slate-300">
+                {aiAnalysis.recommendedActions.map((ra, idx) => (
+                  <li key={idx} className="flex items-start gap-1.5">
+                    <span className="text-emerald-400 shrink-0">→</span> {ra}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Associated Tasks Section */}
       <div className="p-6 sm:p-8 rounded-2xl bg-white border border-slate-200/80 shadow-sm space-y-4">

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { fetchTasks, updateTaskStatus, deleteTask } from '../../redux/slices/taskSlice';
@@ -6,6 +6,7 @@ import { fetchProjects } from '../../redux/slices/projectSlice';
 import { fetchUsers } from '../../redux/slices/userSlice';
 import { addToast } from '../../redux/slices/uiSlice';
 import TaskFormModal from '../../components/forms/TaskFormModal';
+import TaskKanbanBoard from '../../components/tasks/TaskKanbanBoard';
 import Badge from '../../components/common/Badge';
 import Button from '../../components/common/Button';
 import Pagination from '../../components/common/Pagination';
@@ -13,20 +14,21 @@ import {
   CheckSquare,
   Plus,
   Search,
-  Filter,
   Calendar,
   AlertCircle,
   Edit2,
   Trash2,
   ArrowRight,
   User,
+  Download,
+  List,
+  Kanban,
 } from 'lucide-react';
 
 const TaskListPage = () => {
   const dispatch = useDispatch();
   const { items: tasks, pagination, loading } = useSelector((state) => state.tasks);
   const { items: projects } = useSelector((state) => state.projects);
-  const { items: users } = useSelector((state) => state.users);
   const { user } = useSelector((state) => state.auth);
 
   const [search, setSearch] = useState('');
@@ -35,17 +37,19 @@ const TaskListPage = () => {
   const [statusFilter, setStatusFilter] = useState('');
   const [isOverdueOnly, setIsOverdueOnly] = useState(false);
   const [sortBy, setSortBy] = useState('dueDate');
+  const [viewMode, setViewMode] = useState('list'); // 'list' | 'kanban'
+  const now = useMemo(() => Date.now(), []);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
 
   const canCreate = user?.role === 'admin' || user?.role === 'project_manager';
 
-  const loadTasks = (page = 1) => {
+  const loadTasks = useCallback((page = 1) => {
     dispatch(
       fetchTasks({
         page,
-        limit: 10,
+        limit: viewMode === 'kanban' ? 50 : 10,
         search,
         project: projectFilter,
         priority: priorityFilter,
@@ -54,7 +58,7 @@ const TaskListPage = () => {
         sort: sortBy,
       })
     );
-  };
+  }, [dispatch, search, projectFilter, priorityFilter, statusFilter, isOverdueOnly, sortBy, viewMode]);
 
   useEffect(() => {
     dispatch(fetchProjects({ limit: 100 }));
@@ -66,7 +70,7 @@ const TaskListPage = () => {
       loadTasks(1);
     }, 300);
     return () => clearTimeout(timer);
-  }, [search, projectFilter, priorityFilter, statusFilter, isOverdueOnly, sortBy]);
+  }, [loadTasks]);
 
   const handleStatusChange = async (taskId, newStatus) => {
     try {
@@ -88,6 +92,33 @@ const TaskListPage = () => {
     }
   };
 
+  const handleExportCSV = () => {
+    if (!tasks || tasks.length === 0) {
+      dispatch(addToast({ type: 'warning', message: 'No tasks to export' }));
+      return;
+    }
+    const headers = ['Task ID', 'Title', 'Project', 'Assignee', 'Priority', 'Status', 'Due Date'];
+    const rows = tasks.map((t) => [
+      `"${t._id}"`,
+      `"${(t.title || '').replace(/"/g, '""')}"`,
+      `"${(t.project?.name || '').replace(/"/g, '""')}"`,
+      `"${(t.assignedTo?.name || '').replace(/"/g, '""')}"`,
+      `"${t.priority}"`,
+      `"${t.status}"`,
+      `"${new Date(t.dueDate).toLocaleDateString()}"`,
+    ]);
+    const csvContent =
+      'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `tasks_export_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    dispatch(addToast({ type: 'success', message: 'Tasks exported as CSV successfully' }));
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
@@ -99,19 +130,58 @@ const TaskListPage = () => {
           </p>
         </div>
 
-        {canCreate && (
+        <div className="flex items-center gap-2.5 flex-wrap">
+          {/* View Mode Switcher */}
+          <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
+            <button
+              type="button"
+              onClick={() => setViewMode('list')}
+              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 ${
+                viewMode === 'list'
+                  ? 'bg-white text-slate-900 shadow-sm'
+                  : 'text-slate-500 hover:text-slate-900'
+              }`}
+            >
+              <List className="w-3.5 h-3.5" /> List
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('kanban')}
+              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 ${
+                viewMode === 'kanban'
+                  ? 'bg-white text-slate-900 shadow-sm'
+                  : 'text-slate-500 hover:text-slate-900'
+              }`}
+            >
+              <Kanban className="w-3.5 h-3.5" /> Kanban Board
+            </button>
+          </div>
+
+          {/* Export CSV Button */}
           <Button
-            variant="primary"
+            variant="outline"
             size="md"
-            icon={Plus}
-            onClick={() => {
-              setEditingTask(null);
-              setIsModalOpen(true);
-            }}
+            icon={Download}
+            onClick={handleExportCSV}
+            title="Export filtered tasks to CSV"
           >
-            Create Task
+            Export CSV
           </Button>
-        )}
+
+          {canCreate && (
+            <Button
+              variant="primary"
+              size="md"
+              icon={Plus}
+              onClick={() => {
+                setEditingTask(null);
+                setIsModalOpen(true);
+              }}
+            >
+              Create Task
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Multidimensional Filters & Search */}
@@ -125,7 +195,7 @@ const TaskListPage = () => {
               placeholder="Search tasks..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
+              className="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500/20 text-slate-800"
             />
           </div>
 
@@ -200,8 +270,19 @@ const TaskListPage = () => {
         </div>
       </div>
 
-      {/* Task List / Table */}
-      {loading && tasks.length === 0 ? (
+      {/* Main Task Display: Kanban vs List */}
+      {viewMode === 'kanban' ? (
+        <TaskKanbanBoard
+          tasks={tasks}
+          onStatusChange={handleStatusChange}
+          onEditTask={(task) => {
+            setEditingTask(task);
+            setIsModalOpen(true);
+          }}
+          onDeleteTask={handleDelete}
+          user={user}
+        />
+      ) : loading && tasks.length === 0 ? (
         <div className="space-y-3">
           {[1, 2, 3, 4, 5].map((i) => (
             <div key={i} className="h-20 bg-slate-200/60 rounded-2xl animate-pulse" />
@@ -211,7 +292,7 @@ const TaskListPage = () => {
         <div className="space-y-3">
           {tasks.map((task) => {
             const isOverdue =
-              new Date(task.dueDate) < new Date() && task.status !== 'Done';
+              new Date(task.dueDate).getTime() < now && task.status !== 'Done';
             const currentUserId = (user?._id || user?.id)?.toString();
             const assigneeId = (task.assignedTo?._id || task.assignedTo)?.toString();
             const isAssignee = assigneeId && currentUserId && assigneeId === currentUserId;
@@ -268,7 +349,6 @@ const TaskListPage = () => {
 
                 {/* Right Actions: Quick Status Transition & Controls */}
                 <div className="flex items-center gap-3 shrink-0 self-end md:self-center">
-                  {/* Quick status selector */}
                   <select
                     value={task.status}
                     onChange={(e) => handleStatusChange(task._id, e.target.value)}
@@ -326,8 +406,10 @@ const TaskListPage = () => {
         </div>
       )}
 
-      {/* Pagination */}
-      <Pagination pagination={pagination} onPageChange={(p) => loadTasks(p)} />
+      {/* Pagination (only in list mode) */}
+      {viewMode === 'list' && (
+        <Pagination pagination={pagination} onPageChange={(p) => loadTasks(p)} />
+      )}
 
       {/* Task Modal */}
       <TaskFormModal

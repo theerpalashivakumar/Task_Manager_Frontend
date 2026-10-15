@@ -5,7 +5,7 @@ import { loginUser, clearAuthError } from '../../redux/slices/authSlice';
 import { addToast } from '../../redux/slices/uiSlice';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
-import { LogIn, KeyRound } from 'lucide-react';
+import { LogIn } from 'lucide-react';
 
 const LoginPage = () => {
   const dispatch = useDispatch();

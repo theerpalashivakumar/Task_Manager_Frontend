@@ -8,7 +8,7 @@ import {
 import Modal from '../common/Modal';
 import Input from '../common/Input';
 import Button from '../common/Button';
-import { ShieldCheck, Eye, EyeOff, Sparkles, KeyRound } from 'lucide-react';
+import { ShieldCheck, Eye, EyeOff, KeyRound } from 'lucide-react';
 
 const ViewProjectModal = () => {
   const dispatch = useDispatch();

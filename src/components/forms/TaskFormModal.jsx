@@ -4,10 +4,11 @@ import { createTask, updateTask } from '../../redux/slices/taskSlice';
 import { fetchProjects } from '../../redux/slices/projectSlice';
 import { fetchUsers } from '../../redux/slices/userSlice';
 import { addToast } from '../../redux/slices/uiSlice';
+import aiService from '../../services/aiService';
 import Modal from '../common/Modal';
 import Input from '../common/Input';
 import Button from '../common/Button';
-import { CheckSquare } from 'lucide-react';
+import { CheckSquare, Sparkles } from 'lucide-react';
 
 const TaskFormModal = ({ isOpen, onClose, initialData = null, defaultProjectId = null }) => {
   const dispatch = useDispatch();
@@ -25,6 +26,7 @@ const TaskFormModal = ({ isOpen, onClose, initialData = null, defaultProjectId =
   });
 
   const [loading, setLoading] = useState(false);
+  const [aiGenerating, setAiGenerating] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -61,7 +63,6 @@ const TaskFormModal = ({ isOpen, onClose, initialData = null, defaultProjectId =
     setError(null);
   }, [initialData, defaultProjectId, isOpen]);
 
-  // When projects or users finish loading in the background for a new task, fill in default select values if not yet set
   useEffect(() => {
     if (isOpen && !initialData) {
       setFormData((prev) => ({
@@ -74,6 +75,39 @@ const TaskFormModal = ({ isOpen, onClose, initialData = null, defaultProjectId =
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleAiAssist = async () => {
+    if (!formData.title || !formData.title.trim()) {
+      dispatch(addToast({ type: 'warning', message: 'Please enter a task title first' }));
+      return;
+    }
+
+    setAiGenerating(true);
+    try {
+      const res = await aiService.suggestTask({
+        title: formData.title,
+        description: formData.description,
+      });
+
+      if (res.data) {
+        setFormData((prev) => ({
+          ...prev,
+          description: res.data.generatedDescription || prev.description,
+          priority: res.data.suggestedPriority || prev.priority,
+        }));
+        dispatch(
+          addToast({
+            type: 'success',
+            message: `✨ AI generated breakdown (~${res.data.estimatedHours}h / ${res.data.storyPoints} story pts)`,
+          })
+        );
+      }
+    } catch (err) {
+      dispatch(addToast({ type: 'error', message: err.message || 'AI breakdown failed' }));
+    } finally {
+      setAiGenerating(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -130,21 +164,38 @@ const TaskFormModal = ({ isOpen, onClose, initialData = null, defaultProjectId =
           </div>
         )}
 
-        <Input
-          label="Task Title"
-          name="title"
-          placeholder="e.g. Implement API Gateway validation filter"
-          value={formData.title}
-          onChange={handleChange}
-          required
-        />
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between">
+            <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+              Task Title <span className="text-rose-500">*</span>
+            </label>
+            <button
+              type="button"
+              onClick={handleAiAssist}
+              disabled={aiGenerating || !formData.title.trim()}
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-600 hover:text-brand-700 bg-brand-50 hover:bg-brand-100/80 px-2.5 py-1 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed border border-brand-200/60"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-brand-600 animate-spin-slow" />
+              {aiGenerating ? 'Generating...' : '✨ AI Assist'}
+            </button>
+          </div>
+          <input
+            type="text"
+            name="title"
+            placeholder="e.g. Implement API Gateway validation filter"
+            value={formData.title}
+            onChange={handleChange}
+            required
+            className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500/20 text-slate-800"
+          />
+        </div>
 
         <Input
-          label="Description"
+          label="Description & Acceptance Criteria"
           name="description"
           type="textarea"
-          rows={3}
-          placeholder="Detailed task instructions and acceptance criteria..."
+          rows={4}
+          placeholder="Detailed task instructions, acceptance criteria, or generate via AI Assist..."
           value={formData.description}
           onChange={handleChange}
           required
@@ -221,7 +272,6 @@ const TaskFormModal = ({ isOpen, onClose, initialData = null, defaultProjectId =
             required
           />
         </div>
-
       </form>
     </Modal>
   );
