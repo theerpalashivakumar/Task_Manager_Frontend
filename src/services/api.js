@@ -43,6 +43,7 @@ api.interceptors.response.use(
     if (
       customError.statusCode === 401 &&
       !error.config?.url?.includes('/auth/login') &&
+      !error.config?.url?.includes('/auth/register') &&
       !error.config?.url?.includes('/project-explanation')
     ) {
       localStorage.removeItem('token');
