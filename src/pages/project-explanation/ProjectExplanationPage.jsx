@@ -87,7 +87,7 @@ const ProjectExplanationPage = () => {
   }
 
   const tabs = [
-    { id: 'prompt', label: 'Development Prompt', icon: FileText },
+    { id: 'prompt', label: 'Development', icon: FileText },
     { id: 'stack', label: 'Tech Stack & Architecture', icon: Layers },
     { id: 'rbac', label: 'Roles & Permissions', icon: KeyRound },
     { id: 'folders', label: 'Folder Structures', icon: FolderTree },
@@ -160,7 +160,7 @@ const ProjectExplanationPage = () => {
           <div className="p-6 sm:p-8 rounded-3xl bg-white border border-slate-200/80 shadow-sm space-y-4">
             <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-brand-600" />
-              Complete Full-Stack MERN Project Development Prompt
+              Complete Full-Stack MERN Project Development
             </h3>
             <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
               <strong>Objective:</strong> Develop a complete, professional, production-ready Project & Team Management System using the MERN stack. The application allows an organization to manage projects, assign tasks to team members, track project progress, monitor deadlines, and manage collaboration between users with different roles (Admin, Project Manager, Team Member).
